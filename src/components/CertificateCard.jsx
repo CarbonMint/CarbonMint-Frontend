@@ -1,4 +1,5 @@
 import { formatDate, formatTonnes, shortenAddress } from '../utils/format.js';
+import { getLang, getTechnicalLang } from '../utils/lang.js';
 import './CertificateCard.css';
 
 /**
@@ -7,8 +8,10 @@ import './CertificateCard.css';
  * @param {object} props.certificate
  */
 export default function CertificateCard({ certificate }) {
+  const lang = getLang();
+  const techLang = getTechnicalLang();
   return (
-    <article className="certificate">
+    <article className="certificate" lang={lang}>
       <div className="certificate-ribbon">Retirement Certificate</div>
       <div className="certificate-body">
         <h3 className="certificate-tonnes">{formatTonnes(certificate.tonnes)}</h3>
@@ -17,7 +20,8 @@ export default function CertificateCard({ certificate }) {
         <dl className="certificate-meta">
           <div>
             <dt>Certificate ID</dt>
-            <dd className="mono">{certificate.id}</dd>
+            {/* Technical identifier — locale-independent character sequence */}
+            <dd className="mono" lang={techLang}>{certificate.id}</dd>
           </div>
           <div>
             <dt>Vintage</dt>
@@ -25,7 +29,8 @@ export default function CertificateCard({ certificate }) {
           </div>
           <div>
             <dt>Serial</dt>
-            <dd className="mono">{certificate.serial}</dd>
+            {/* Registry serial — locale-independent */}
+            <dd className="mono" lang={techLang}>{certificate.serial}</dd>
           </div>
           <div>
             <dt>Retired</dt>
@@ -37,7 +42,8 @@ export default function CertificateCard({ certificate }) {
           </div>
           <div>
             <dt>Burn tx</dt>
-            <dd className="mono certificate-tx">{certificate.burnTxHash}</dd>
+            {/* Transaction hash — locale-independent */}
+            <dd className="mono certificate-tx" lang={techLang}>{certificate.burnTxHash}</dd>
           </div>
         </dl>
       </div>

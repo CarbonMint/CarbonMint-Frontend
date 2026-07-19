@@ -1,4 +1,5 @@
 import { CONFIG } from '../constants/config.js';
+import { getLang } from '../utils/lang.js';
 import './Footer.css';
 
 /**
@@ -7,7 +8,7 @@ import './Footer.css';
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="footer">
+    <footer className="footer" lang={getLang()}>
       <div className="footer-inner">
         <p className="footer-tagline">
           CarbonMint — tokenized carbon credits on Stellar &amp; Soroban.

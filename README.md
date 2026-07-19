@@ -69,6 +69,59 @@ src/
   constants/    project catalog and runtime config
 ```
 
+## Internationalisation (i18n readiness)
+
+The application is wired for future locale switching without requiring
+component-level edits.
+
+### Language constants
+
+`src/constants/config.js` exports `LANG_CONFIG`:
+
+```js
+export const LANG_CONFIG = {
+  DEFAULT_LANG: 'en',      // BCP 47 tag for all human-readable content
+  TECHNICAL_LANG: 'en',    // tag for locale-independent content (hashes, IDs)
+};
+```
+
+Override `DEFAULT_LANG` at build time with the `VITE_LANG` environment variable.
+
+### Lang utilities
+
+`src/utils/lang.js` exports two helpers:
+
+| Function | Returns | Use on |
+|---|---|---|
+| `getLang()` | `LANG_CONFIG.DEFAULT_LANG` | Human-readable elements |
+| `getTechnicalLang()` | `LANG_CONFIG.TECHNICAL_LANG` | Hashes, serials, contract IDs, wallet addresses |
+
+```jsx
+import { getLang, getTechnicalLang } from '../utils/lang.js';
+
+<article lang={getLang()}>…</article>
+<dd className="mono" lang={getTechnicalLang()}>{txHash}</dd>
+```
+
+### Current coverage
+
+| Element | `lang` source |
+|---|---|
+| `<html>` in `index.html` | hardcoded `"en"` |
+| `<header>` in `Navbar` | `getLang()` |
+| `<footer>` in `Footer` | `getLang()` |
+| `<article>` in `CertificateCard` | `getLang()` |
+| Certificate ID / Serial / Burn tx `<dd>` | `getTechnicalLang()` |
+| Batch serial and receipt tx hash `<p>` in `BatchDetail` | `getTechnicalLang()` |
+
+### Adding locale support later
+
+1. Store the user's locale preference (e.g. in `AppContext` or `localStorage`).
+2. Update `getLang()` in `src/utils/lang.js` to read that preference instead of
+   falling back directly to `LANG_CONFIG.DEFAULT_LANG`.
+3. No component changes are needed — every `lang` attribute already calls
+   `getLang()`.
+
 ## Accessibility
 
 CarbonMint follows WCAG 2.1 SC 4.1.3 (Status Messages) to ensure screen readers

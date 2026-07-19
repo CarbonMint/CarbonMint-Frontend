@@ -4,6 +4,7 @@ import { fetchBatch, submitBuy } from '../services/api.js';
 import { useWallet } from '../hooks/useWallet.js';
 import { useHoldings } from '../hooks/useHoldings.js';
 import { formatCurrency, formatTonnes } from '../utils/format.js';
+import { getTechnicalLang } from '../utils/lang.js';
 import BuyForm from '../components/BuyForm.jsx';
 import Loader from '../components/Loader.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
@@ -104,7 +105,8 @@ export default function BatchDetail() {
             </div>
             <div>
               <dt>Serial</dt>
-              <dd className="mono">{batch.serial}</dd>
+              {/* Registry serial — locale-independent character sequence */}
+              <dd className="mono" lang={getTechnicalLang()}>{batch.serial}</dd>
             </div>
             <div>
               <dt>Total minted</dt>
@@ -138,7 +140,8 @@ export default function BatchDetail() {
                 You bought {formatTonnes(receipt.quantity)} for{' '}
                 {formatCurrency(receipt.total)}.
               </p>
-              <p className="mono buy-receipt-tx">{receipt.txHash}</p>
+              {/* Transaction hash — locale-independent */}
+              <p className="mono buy-receipt-tx" lang={getTechnicalLang()}>{receipt.txHash}</p>
               <Link to="/my-credits">View in My Credits →</Link>
             </div>
           )}
