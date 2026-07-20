@@ -1,19 +1,21 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMarket } from "../hooks/useMarket.js";
 import { useDocumentTitle } from "../hooks/useDocumentTitle.js";
 import { useDebounce } from "../hooks/useDebounce.js";
 import { useInterval } from "../hooks/useInterval.js";
 import { formatRelativeTime } from "../utils/format.js";
+import { useRecentSearches } from "../hooks/useRecentSearches.js";
 import BatchCard from "../components/BatchCard.jsx";
 import ListingRow from "../components/ListingRow.jsx";
 import SkeletonGrid from "../components/SkeletonGrid.jsx";
 import ErrorMessage from "../components/ErrorMessage.jsx";
 import EmptyState from "../components/EmptyState.jsx";
+import RecentSearches from "../components/RecentSearches.jsx";
 import "./Marketplace.css";
 
 /**
  * Marketplace page listing all available carbon-credit batches. Supports a
- * grid and list view toggle.
+ * grid and list view toggle, plus a recent-searches dropdown.
  */
 export default function Marketplace() {
   useDocumentTitle("Marketplace");
@@ -21,7 +23,10 @@ export default function Marketplace() {
   const [view, setView] = useState("grid");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("default");
+  const [showRecent, setShowRecent] = useState(false);
   const debouncedQuery = useDebounce(query);
+  const { searches, push, remove, clear } = useRecentSearches();
+  const searchRef = useRef(null);
 
   // Re-render every 30s so the relative "updated Xs ago" label stays fresh
   // without needing to refetch the data itself.
@@ -89,13 +94,38 @@ export default function Marketplace() {
 
       {!loading && !error && batches.length > 0 && (
         <div className="marketplace-controls">
-          <input
-            type="search"
-            className="marketplace-search"
-            placeholder="Search by project, country or type..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          <div className="marketplace-search-wrap" ref={searchRef}>
+            <input
+              type="search"
+              className="marketplace-search"
+              placeholder="Search by project, country or type..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setShowRecent(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  push(query);
+                  setShowRecent(false);
+                  e.target.blur();
+                }
+                if (e.key === "Escape") {
+                  setShowRecent(false);
+                }
+              }}
+            />
+            <RecentSearches
+              searches={searches}
+              visible={showRecent}
+              onSelect={(term) => {
+                setQuery(term);
+                push(term);
+                setShowRecent(false);
+              }}
+              onRemove={(term) => remove(term)}
+              onClear={() => clear()}
+              onClose={() => setShowRecent(false)}
+            />
+          </div>
           <select
             className="marketplace-sort"
             value={sort}
