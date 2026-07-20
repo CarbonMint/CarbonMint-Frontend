@@ -6,6 +6,8 @@
   user-select: none;
   font-size: 0.9rem;
   color: var(--color-text);
+  min-height: 44px;
+  padding: 0.25rem 0;
 }
 
 .checkbox.is-disabled {
