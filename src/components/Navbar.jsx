@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import WalletButton from './WalletButton.jsx';
+import { getLang } from '../utils/lang.js';
 import './Navbar.css';
 
 const links = [
@@ -14,7 +15,7 @@ const links = [
  */
 export default function Navbar() {
   return (
-    <header className="navbar">
+    <header className="navbar" lang={getLang()}>
       <div className="navbar-inner">
         <NavLink to="/" className="navbar-brand">
           <span className="navbar-logo" aria-hidden="true">
