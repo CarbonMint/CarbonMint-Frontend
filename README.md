@@ -13,7 +13,8 @@ wallet, and **retire** (burn) them to receive a permanent offset certificate.
 - Landing page explaining the tokenized carbon-credit lifecycle (mint → buy → retire).
 - Marketplace with grid and list views of available credit batches, showing a
   live "last updated" timestamp for the listed data.
-- Batch detail page with a validated buy flow and live cost calculation.
+- Batch detail page with a validated buy flow, live cost calculation, and a
+  configurable **slippage tolerance** setting.
 - My Credits page showing holdings with a retire flow.
 - Retirements page listing issued offset certificates.
 - Mock Stellar wallet connect/disconnect.
@@ -55,6 +56,58 @@ test suite. Any failure will block the workflow.
    Holdings are tracked in `AppContext`.
 3. **Retire** — users burn credits they hold; the app issues a retirement
    certificate as proof of offset.
+
+## Slippage tolerance
+
+When buying credits the user can configure a **slippage tolerance** — the
+maximum price increase they are willing to accept between placing an order and
+it settling on-chain. This mirrors the slippage protection found in DEX/AMM
+interfaces.
+
+### How it works
+
+The tolerance is expressed as a percentage (e.g. **1 %**). Before submitting a
+transaction `submitBuy` computes:
+
+```
+maxAcceptablePrice = referencePrice × (1 + slippageTolerance / 100)
+```
+
+If the current listed price is higher than `maxAcceptablePrice` the transaction
+is rejected with an error message that names both the fill price and the limit.
+In this mock the price is static, so the happy-path guard always passes; the
+rejection path is demonstrated by the test suite.
+
+### UI controls (BuyForm)
+
+| Control | Description |
+|---|---|
+| **Preset buttons** (0.5 %, 1 %, 2 %) | Quick-select common tolerance values. The active preset is highlighted and has `aria-pressed="true"`. |
+| **Custom input** | Free-form numeric field for values between 0.1 % and 50 %. Accepts one decimal place. |
+| **Max cost line** | Displays `quantity × pricePerTonne × (1 + tolerance / 100)` so the user knows their worst-case spend. |
+| **High-slippage warning** | A yellow advisory message appears when tolerance exceeds 5 %. |
+
+The default tolerance is **1 %**.
+
+### Validation (`validateSlippageTolerance`)
+
+Located in `src/utils/validate.js`. Returns `{ valid, error }`.
+
+| Condition | Error message |
+|---|---|
+| Empty / null / undefined | "Enter a slippage tolerance." |
+| Non-numeric string | "Slippage tolerance must be a number." |
+| Below 0.1 % | "Slippage tolerance must be at least 0.1%." |
+| Above 50 % | "Slippage tolerance cannot exceed 50%." |
+
+### Accessibility
+
+The slippage fieldset follows the same patterns as the rest of the form:
+
+- Preset buttons expose `aria-pressed` state.
+- The custom input has an explicit `aria-label` ("Custom slippage tolerance").
+- Validation errors and the high-slippage warning use `role="alert"` /
+  `aria-live="polite"` so screen readers announce them without interrupting.
 
 ## Project structure
 
