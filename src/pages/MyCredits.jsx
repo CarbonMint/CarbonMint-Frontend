@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../hooks/useWallet.js';
 import { useHoldings } from '../hooks/useHoldings.js';
@@ -11,6 +11,14 @@ import EmptyState from '../components/EmptyState.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
 import LiveRegion from '../components/LiveRegion.jsx';
 import './MyCredits.css';
+
+/** Column definitions for the holdings table. */
+const HOLDING_COLUMNS = [
+  { key: 'name', label: 'Project' },
+  { key: 'vintage', label: 'Vintage' },
+  { key: 'price', label: 'Price' },
+  { key: 'tonnes', label: 'Held' },
+];
 
 /**
  * Shows the connected wallet's credit holdings and lets the user retire
@@ -25,6 +33,48 @@ export default function MyCredits() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [retireSuccess, setRetireSuccess] = useState('');
+  const [sort, setSort] = useState('default');
+
+  /** Toggle a column header: asc -> desc -> none. */
+  const handleSortToggle = useCallback((field) => {
+    setSort((prev) => {
+      if (prev === `${field}-asc`) return `${field}-desc`;
+      if (prev === `${field}-desc`) return 'default';
+      return `${field}-asc`;
+    });
+  }, []);
+
+  /** Apply current sort to the holdings list. */
+  const sortedHoldings = useMemo(() => {
+    if (sort === 'default') return holdings;
+    const [field, dir] = sort.split('-');
+    return [...holdings].sort((a, b) => {
+      let va, vb;
+      switch (field) {
+        case 'name':
+          va = (a.projectName || '').toLowerCase();
+          vb = (b.projectName || '').toLowerCase();
+          break;
+        case 'vintage':
+          va = a.vintage;
+          vb = b.vintage;
+          break;
+        case 'price':
+          va = a.pricePerTonne;
+          vb = b.pricePerTonne;
+          break;
+        case 'tonnes':
+          va = a.tonnes;
+          vb = b.tonnes;
+          break;
+        default:
+          return 0;
+      }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [holdings, sort]);
 
   async function handleConfirm(tonnes, beneficiary) {
     setSubmitting(true);
@@ -95,23 +145,65 @@ export default function MyCredits() {
           }
         />
       ) : (
-        <div className="holdings-list">
-          {holdings.map((holding) => (
-            <div className="holding-row" key={holding.batchId}>
-              <div className="holding-info">
-                <strong>{holding.projectName}</strong>
-                <span className="holding-sub">
-                  Vintage {holding.vintage} · {formatCurrency(holding.pricePerTonne)}{' '}
-                  / tonne
-                </span>
-              </div>
-              <div className="holding-amount">{formatTonnes(holding.tonnes)}</div>
-              <Button variant="danger" onClick={() => setActive(holding)}>
-                Retire
-              </Button>
+        <>
+          <div className="holdings-controls">
+            <select
+              className="holdings-sort"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label="Sort holdings"
+            >
+              <option value="default">Sort: Default</option>
+              <option value="name-asc">Project: A to Z</option>
+              <option value="name-desc">Project: Z to A</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="tonnes-desc">Most held</option>
+              <option value="tonnes-asc">Least held</option>
+              <option value="vintage-desc">Vintage: Newest first</option>
+              <option value="vintage-asc">Vintage: Oldest first</option>
+            </select>
+          </div>
+          <div className="holdings-list">
+            <div className="holdings-header" role="row">
+              {HOLDING_COLUMNS.map((col) => {
+                const isAsc = sort === `${col.key}-asc`;
+                const isDesc = sort === `${col.key}-desc`;
+                return (
+                  <button
+                    key={col.key}
+                    type="button"
+                    role="columnheader"
+                    className={`holdings-header-btn${isAsc || isDesc ? " active" : ""}`}
+                    aria-sort={isAsc ? "ascending" : isDesc ? "descending" : "none"}
+                    onClick={() => handleSortToggle(col.key)}
+                  >
+                    {col.label}
+                    <span className="sort-arrow" aria-hidden="true">
+                      {isAsc ? " ▲" : isDesc ? " ▼" : ""}
+                    </span>
+                  </button>
+                );
+              })}
+              <span className="holdings-header-action">Action</span>
             </div>
-          ))}
-        </div>
+            {sortedHoldings.map((holding) => (
+              <div className="holding-row" key={holding.batchId}>
+                <div className="holding-info">
+                  <strong>{holding.projectName}</strong>
+                  <span className="holding-sub">
+                    Vintage {holding.vintage} · {formatCurrency(holding.pricePerTonne)}{' '}
+                    / tonne
+                  </span>
+                </div>
+                <div className="holding-amount">{formatTonnes(holding.tonnes)}</div>
+                <Button variant="danger" onClick={() => setActive(holding)}>
+                  Retire
+                </Button>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {active && (

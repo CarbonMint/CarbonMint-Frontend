@@ -27,15 +27,78 @@
   color: var(--color-accent);
 }
 
+.holdings-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.holdings-sort {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.holdings-sort:focus {
+  outline: none;
+  border-color: var(--color-primary-light);
+}
+
 .holdings-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
+.holdings-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.holdings-header-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.holdings-header-btn:hover {
+  color: var(--color-text);
+}
+
+.holdings-header-btn.active {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.holdings-header-action {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
 .holding-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   align-items: center;
   gap: 1rem;
   background: var(--color-surface);
@@ -66,5 +129,9 @@
 
   .holding-row .holding-amount {
     grid-column: 1 / -1;
+  }
+
+  .holdings-header {
+    grid-template-columns: 1fr auto;
   }
 }
