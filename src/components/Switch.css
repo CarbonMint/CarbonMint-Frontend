@@ -4,6 +4,8 @@
   gap: 0.6rem;
   cursor: pointer;
   user-select: none;
+  min-height: 44px;
+  padding: 0.25rem 0;
 }
 
 .switch.is-disabled {
