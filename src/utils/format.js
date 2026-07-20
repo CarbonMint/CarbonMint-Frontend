@@ -98,6 +98,57 @@ export function formatDate(iso) {
 }
 
 /**
+ * Get the start of the ISO week (Monday) for a given date (UTC).
+ * @param {string|Date} value - ISO string or Date
+ * @returns {Date}
+ */
+export function getWeekStart(value) {
+  const d = value instanceof Date ? new Date(value) : new Date(value);
+  const day = d.getUTCDay();
+  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+  d.setUTCDate(diff);
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
+
+/**
+ * Return a human-readable month+year label for an ISO date, e.g. "July 2026".
+ * @param {string} iso
+ * @returns {string}
+ */
+export function getMonthLabel(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).formatToParts(d);
+  const month = parts.find((p) => p.type === 'month').value;
+  const year = parts.find((p) => p.type === 'year').value;
+  return `${month} ${year}`;
+}
+
+/**
+ * Return a week label for an ISO date, e.g. "Week of Jul 14".
+ * @param {string} iso
+ * @returns {string}
+ */
+export function getWeekLabel(iso) {
+  if (!iso) return '';
+  const weekStart = getWeekStart(iso);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).formatToParts(weekStart);
+  const month = parts.find((p) => p.type === 'month').value;
+  const day = parts.find((p) => p.type === 'day').value;
+  return `Week of ${month} ${day}`;
+}
+
+/**
  * Format a timestamp as a relative "time ago" string in the viewer's local
  * timezone, e.g. "just now", "5 minutes ago", "3 hours ago". Falls back to
  * a full local date/time once it's more than a day old.
