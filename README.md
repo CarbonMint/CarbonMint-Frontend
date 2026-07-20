@@ -14,7 +14,7 @@ wallet, and **retire** (burn) them to receive a permanent offset certificate.
 - Marketplace with grid and list views of available credit batches, showing a
   live "last updated" timestamp for the listed data.
 - Batch detail page with a validated buy flow and live cost calculation.
-- My Credits page showing holdings with a retire flow.
+- My Credits page showing holdings with a retire flow that also accepts Enter-key submission.
 - Retirements page listing issued offset certificates.
 - Mock Stellar wallet connect/disconnect.
 

@@ -18,6 +18,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 // Most components depend on useWallet which reads from AppContext. We mock it.
@@ -189,6 +190,7 @@ describe('SkeletonGrid', () => {
 
 // ─── BuyForm ─────────────────────────────────────────────────────────────────
 import BuyForm from '../components/BuyForm.jsx';
+import RetireModal from '../components/RetireModal.jsx';
 
 const mockBatch = {
   id: 'batch-1',
@@ -226,11 +228,52 @@ describe('BuyForm', () => {
     expect(errors.length).toBeGreaterThan(0);
   });
 
+  it('submits the form when the user presses Enter in the quantity field', async () => {
+    const user = userEvent.setup();
+    const onBuy = vi.fn();
+
+    render(<BuyForm batch={mockBatch} onBuy={onBuy} submitting={false} />);
+
+    const input = screen.getByLabelText(/quantity/i);
+    await user.clear(input);
+    await user.type(input, '3');
+    await user.keyboard('{Enter}');
+
+    expect(onBuy).toHaveBeenCalledWith(3);
+  });
+
   it('renders a "Sold out" message and no form when availableTonnes is 0', () => {
     const soldOut = { ...mockBatch, availableTonnes: 0 };
     render(<BuyForm batch={soldOut} onBuy={vi.fn()} submitting={false} />);
     expect(screen.getByText(/fully sold/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/quantity/i)).not.toBeInTheDocument();
+  });
+
+  it('submits the retire form when the user presses Enter in the tonnes field', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    const holding = {
+      id: 'holding-1',
+      projectName: 'Forest Guardians',
+      vintage: '2024',
+      tonnes: 80,
+    };
+
+    render(
+      <RetireModal
+        holding={holding}
+        submitting={false}
+        onConfirm={onConfirm}
+        onClose={vi.fn()}
+      />
+    );
+
+    const input = screen.getByLabelText(/tonnes to retire/i);
+    await user.clear(input);
+    await user.type(input, '3');
+    await user.keyboard('{Enter}');
+
+    expect(onConfirm).toHaveBeenCalledWith(3, '');
   });
 
   it('shows "Connect wallet to buy" button when wallet not connected', () => {

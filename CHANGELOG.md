@@ -8,6 +8,8 @@ project follows semantic versioning.
 
 ### Added
 
+- Keyboard-friendly buy and retire forms that submit when pressing Enter in a
+  quantity or tonnes field.
 - Last-updated timestamp on the Marketplace page, shown as a relative time
   (e.g. "Updated 2 minutes ago") that refreshes automatically and shows the
   full local date/time on hover.
