@@ -42,7 +42,7 @@ export default function BatchDetail() {
     load();
   }, [load]);
 
-  async function handleBuy(quantity) {
+  async function handleBuy(quantity, slippageTolerance) {
     setSubmitting(true);
     setError(null);
     try {
@@ -50,6 +50,10 @@ export default function BatchDetail() {
         batchId: batch.id,
         quantity,
         buyer: wallet?.publicKey,
+        slippageTolerance,
+        // Pass the price the user saw so the API can detect any price movement
+        // between form render and submission.
+        referencePrice: batch.pricePerTonne,
       });
       addHolding({
         batchId: batch.id,

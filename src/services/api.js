@@ -46,10 +46,35 @@ export async function fetchBatch(id) {
 
 /**
  * Simulate a buy transaction. Returns a mock transaction receipt.
- * @param {{ batchId: string, quantity: number, buyer: string }} params
+ *
+ * The `slippageTolerance` parameter (in percent, e.g. 1 = 1 %) guards against
+ * the fill price moving between the moment the user set their tolerance and
+ * the moment the transaction settles. The `referencePrice` is the price per
+ * tonne the user saw when they placed the order; if the current listed price
+ * has risen beyond `referencePrice * (1 + slippageTolerance / 100)` the
+ * transaction is rejected.
+ *
+ * In this mock the price never moves, so `referencePrice` defaults to the
+ * current listed price and the guard always passes in the happy path. The
+ * rejection path is exercised by the test suite by passing a lower
+ * referencePrice than the current listing.
+ *
+ * @param {{
+ *   batchId: string,
+ *   quantity: number,
+ *   buyer: string,
+ *   slippageTolerance?: number,
+ *   referencePrice?: number
+ * }} params
  * @returns {Promise<Object>}
  */
-export async function submitBuy({ batchId, quantity, buyer }) {
+export async function submitBuy({
+  batchId,
+  quantity,
+  buyer,
+  slippageTolerance = 1,
+  referencePrice,
+}) {
   await delay(LATENCY_MS);
   const batch = BATCHES.find((b) => b.id === batchId);
   if (!batch) {
@@ -58,6 +83,17 @@ export async function submitBuy({ batchId, quantity, buyer }) {
   if (quantity > batch.availableTonnes) {
     throw new Error('Not enough credits available in this batch.');
   }
+
+  // Enforce slippage tolerance: reject if the current fill price has moved
+  // beyond the user's limit relative to the price they saw when ordering.
+  const baseline = referencePrice != null ? referencePrice : batch.pricePerTonne;
+  const maxAcceptablePrice = baseline * (1 + slippageTolerance / 100);
+  if (batch.pricePerTonne > maxAcceptablePrice) {
+    throw new Error(
+      `Transaction rejected: price of ${batch.pricePerTonne} USDC/tonne exceeds your slippage limit of ${maxAcceptablePrice.toFixed(4)} USDC/tonne.`
+    );
+  }
+
   batch.availableTonnes -= quantity;
   return {
     txHash: `mocktx_${Math.random().toString(16).slice(2, 12)}`,
@@ -65,6 +101,7 @@ export async function submitBuy({ batchId, quantity, buyer }) {
     quantity,
     buyer,
     total: quantity * batch.pricePerTonne,
+    slippageTolerance,
     timestamp: new Date().toISOString(),
   };
 }

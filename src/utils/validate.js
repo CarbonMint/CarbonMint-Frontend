@@ -55,6 +55,38 @@ export function validateRetireQuantity(quantity, owned) {
 }
 
 /**
+ * Validate a slippage tolerance percentage value.
+ *
+ * Acceptable range: 0.1 % – 50 %. Values outside this range are either
+ * meaninglessly tight (below 0.1 %) or dangerously loose (above 50 %).
+ *
+ * @param {number|string} value - the tolerance as a percentage, e.g. 1 means 1 %
+ * @returns {{ valid: boolean, error: string|null }}
+ */
+export function validateSlippageTolerance(value) {
+  const v = Number(value);
+  if (value === '' || value === null || value === undefined) {
+    return { valid: false, error: 'Enter a slippage tolerance.' };
+  }
+  if (Number.isNaN(v)) {
+    return { valid: false, error: 'Slippage tolerance must be a number.' };
+  }
+  if (v < 0.1) {
+    return {
+      valid: false,
+      error: 'Slippage tolerance must be at least 0.1%.',
+    };
+  }
+  if (v > 50) {
+    return {
+      valid: false,
+      error: 'Slippage tolerance cannot exceed 50%.',
+    };
+  }
+  return { valid: true, error: null };
+}
+
+/**
  * Check whether a string looks like a Stellar public key. A real public key is
  * a 56-character base32 string beginning with `G`; this performs a shape check
  * suitable for client-side validation only.
