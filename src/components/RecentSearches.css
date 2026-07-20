@@ -1,0 +1,88 @@
+.recent-searches {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 20;
+  padding: 0.5rem;
+}
+
+.recent-searches-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+  padding: 0 0.25rem;
+}
+
+.recent-searches-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.recent-searches-clear {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  min-height: 28px;
+}
+
+.recent-searches-clear:hover {
+  color: var(--color-danger);
+}
+
+.recent-searches-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.recent-searches-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.recent-searches-term {
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.3rem 0 0.3rem 0.6rem;
+  white-space: nowrap;
+}
+
+.recent-searches-term:hover {
+  color: var(--color-primary-light);
+}
+
+.recent-searches-dismiss {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0.3rem 0.45rem;
+  opacity: 0.6;
+}
+
+.recent-searches-dismiss:hover {
+  opacity: 1;
+  color: var(--color-danger);
+}

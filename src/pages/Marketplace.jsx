@@ -1,28 +1,21 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMarket } from "../hooks/useMarket.js";
 import { useDocumentTitle } from "../hooks/useDocumentTitle.js";
 import { useDebounce } from "../hooks/useDebounce.js";
 import { useInterval } from "../hooks/useInterval.js";
 import { formatRelativeTime } from "../utils/format.js";
+import { useRecentSearches } from "../hooks/useRecentSearches.js";
 import BatchCard from "../components/BatchCard.jsx";
 import ListingRow from "../components/ListingRow.jsx";
 import SkeletonGrid from "../components/SkeletonGrid.jsx";
 import ErrorMessage from "../components/ErrorMessage.jsx";
 import EmptyState from "../components/EmptyState.jsx";
+import RecentSearches from "../components/RecentSearches.jsx";
 import "./Marketplace.css";
-
-/** All column keys that the table / sort controls support. */
-const COLUMNS = [
-  { key: "name", label: "Project" },
-  { key: "country", label: "Country" },
-  { key: "vintage", label: "Vintage" },
-  { key: "available", label: "Available" },
-  { key: "price", label: "Price" },
-];
 
 /**
  * Marketplace page listing all available carbon-credit batches. Supports a
- * grid and list view toggle, search, and column-based sorting.
+ * grid and list view toggle, plus a recent-searches dropdown.
  */
 export default function Marketplace() {
   useDocumentTitle("Marketplace");
@@ -30,21 +23,15 @@ export default function Marketplace() {
   const [view, setView] = useState("grid");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("default");
+  const [showRecent, setShowRecent] = useState(false);
   const debouncedQuery = useDebounce(query);
+  const { searches, push, remove, clear } = useRecentSearches();
+  const searchRef = useRef(null);
 
   // Re-render every 30s so the relative "updated Xs ago" label stays fresh
   // without needing to refetch the data itself.
   const [, forceTick] = useState(0);
   useInterval(() => forceTick((n) => n + 1), lastUpdated ? 30000 : null);
-
-  /** Toggle a column header: asc → desc → none. */
-  const handleSortToggle = useCallback((field) => {
-    setSort((prev) => {
-      if (prev === `${field}-asc`) return `${field}-desc`;
-      if (prev === `${field}-desc`) return "default";
-      return `${field}-asc`;
-    });
-  }, []);
 
   const filtered = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
@@ -60,38 +47,12 @@ export default function Marketplace() {
         });
 
     const sorted = [...matched];
-    if (sort !== "default") {
-      const [field, dir] = sort.split("-");
-      sorted.sort((a, b) => {
-        let va, vb;
-        switch (field) {
-          case "name":
-            va = (a.project?.name || "").toLowerCase();
-            vb = (b.project?.name || "").toLowerCase();
-            break;
-          case "country":
-            va = (a.project?.country || "").toLowerCase();
-            vb = (b.project?.country || "").toLowerCase();
-            break;
-          case "vintage":
-            va = a.vintage;
-            vb = b.vintage;
-            break;
-          case "available":
-            va = a.availableTonnes;
-            vb = b.availableTonnes;
-            break;
-          case "price":
-            va = a.pricePerTonne;
-            vb = b.pricePerTonne;
-            break;
-          default:
-            return 0;
-        }
-        if (va < vb) return dir === "asc" ? -1 : 1;
-        if (va > vb) return dir === "asc" ? 1 : -1;
-        return 0;
-      });
+    if (sort === "price-asc") {
+      sorted.sort((a, b) => a.pricePerTonne - b.pricePerTonne);
+    } else if (sort === "price-desc") {
+      sorted.sort((a, b) => b.pricePerTonne - a.pricePerTonne);
+    } else if (sort === "available-desc") {
+      sorted.sort((a, b) => b.availableTonnes - a.availableTonnes);
     }
     return sorted;
   }, [batches, debouncedQuery, sort]);
@@ -133,13 +94,38 @@ export default function Marketplace() {
 
       {!loading && !error && batches.length > 0 && (
         <div className="marketplace-controls">
-          <input
-            type="search"
-            className="marketplace-search"
-            placeholder="Search by project, country or type..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          <div className="marketplace-search-wrap" ref={searchRef}>
+            <input
+              type="search"
+              className="marketplace-search"
+              placeholder="Search by project, country or type..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setShowRecent(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  push(query);
+                  setShowRecent(false);
+                  e.target.blur();
+                }
+                if (e.key === "Escape") {
+                  setShowRecent(false);
+                }
+              }}
+            />
+            <RecentSearches
+              searches={searches}
+              visible={showRecent}
+              onSelect={(term) => {
+                setQuery(term);
+                push(term);
+                setShowRecent(false);
+              }}
+              onRemove={(term) => remove(term)}
+              onClear={() => clear()}
+              onClose={() => setShowRecent(false)}
+            />
+          </div>
           <select
             className="marketplace-sort"
             value={sort}
@@ -147,16 +133,9 @@ export default function Marketplace() {
             aria-label="Sort batches"
           >
             <option value="default">Sort: Default</option>
-            <option value="name-asc">Name: A to Z</option>
-            <option value="name-desc">Name: Z to A</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
             <option value="available-desc">Most available</option>
-            <option value="available-asc">Least available</option>
-            <option value="vintage-desc">Vintage: Newest first</option>
-            <option value="vintage-asc">Vintage: Oldest first</option>
-            <option value="country-asc">Country: A to Z</option>
-            <option value="country-desc">Country: Z to A</option>
           </select>
         </div>
       )}
@@ -186,26 +165,12 @@ export default function Marketplace() {
 
       {!loading && !error && filtered.length > 0 && view === "list" && (
         <div className="marketplace-list">
-          <div className="listing-header" role="row">
-            {COLUMNS.map((col) => {
-              const isAsc = sort === `${col.key}-asc`;
-              const isDesc = sort === `${col.key}-desc`;
-              return (
-                <button
-                  key={col.key}
-                  type="button"
-                  role="columnheader"
-                  className={`listing-header-btn${isAsc || isDesc ? " active" : ""}`}
-                  aria-sort={isAsc ? "ascending" : isDesc ? "descending" : "none"}
-                  onClick={() => handleSortToggle(col.key)}
-                >
-                  {col.label}
-                  <span className="sort-arrow" aria-hidden="true">
-                    {isAsc ? " ▲" : isDesc ? " ▼" : ""}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="listing-header">
+            <span>Project</span>
+            <span>Country</span>
+            <span>Vintage</span>
+            <span>Available</span>
+            <span className="listing-header-price">Price</span>
           </div>
           {filtered.map((batch) => (
             <ListingRow key={batch.id} batch={batch} />
