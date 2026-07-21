@@ -8,6 +8,7 @@ const links = [
   { to: '/marketplace', label: 'Marketplace' },
   { to: '/my-credits', label: 'My Credits' },
   { to: '/retirements', label: 'Retirements' },
+  { to: '/settings', label: 'Settings' },
 ];
 
 /**

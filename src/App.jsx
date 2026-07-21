@@ -8,6 +8,7 @@ import Marketplace from './pages/Marketplace.jsx';
 import BatchDetail from './pages/BatchDetail.jsx';
 import MyCredits from './pages/MyCredits.jsx';
 import Retirements from './pages/Retirements.jsx';
+import Settings from './pages/Settings.jsx';
 import NotFound from './pages/NotFound.jsx';
 import './App.css';
 
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/batch/:id" element={<BatchDetail />} />
           <Route path="/my-credits" element={<MyCredits />} />
           <Route path="/retirements" element={<Retirements />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

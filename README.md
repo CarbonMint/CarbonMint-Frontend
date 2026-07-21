@@ -17,6 +17,7 @@ wallet, and **retire** (burn) them to receive a permanent offset certificate.
   configurable **slippage tolerance** setting.
 - My Credits page showing holdings with a retire flow.
 - Retirements page listing issued offset certificates.
+- Settings page with **locale preference** for currency and number formatting.
 - Mock Stellar wallet connect/disconnect.
 
 ## Tech stack
@@ -198,6 +199,79 @@ src/
 
 CarbonMint follows WCAG 2.1 SC 4.1.3 (Status Messages) to ensure screen readers
 receive timely announcements for every asynchronous UI update.
+
+## Locale preference
+
+Users can customize how currency and numbers are formatted throughout the
+application via the Settings page (`/settings`).
+
+### Supported locales
+
+The application supports the following locales:
+
+- **en-US** (English - United States): `1,234.56 USDC`
+- **en-GB** (English - United Kingdom): `1,234.56 USDC`
+- **de-DE** (German - Germany): `1.234,56 USDC`
+- **fr-FR** (French - France): `1 234,56 USDC`
+- **es-ES** (Spanish - Spain): `1.234,56 USDC`
+- **pt-BR** (Portuguese - Brazil): `1.234,56 USDC`
+- **ja-JP** (Japanese - Japan): `1,234.56 USDC`
+
+### Implementation
+
+Locale preference is managed in **AppContext** and persisted to `localStorage`
+under the key `carbonmint:locale`. All formatting functions in `src/utils/format.js`
+accept an optional `locale` parameter (BCP 47 language tag).
+
+Components can access locale-aware formatting in two ways:
+
+1. **useFormat hook** (recommended): Returns formatting functions pre-bound to
+   the user's locale preference:
+
+```js
+import { useFormat } from '../hooks/useFormat.js';
+
+function MyComponent() {
+  const { formatCurrency, formatTonnes } = useFormat();
+  return <div>{formatCurrency(1234.56)}</div>;
+}
+```
+
+2. **Direct usage**: Import formatting functions and pass locale explicitly:
+
+```js
+import { formatCurrency } from '../utils/format.js';
+import { useLocale } from '../hooks/useLocale.js';
+
+function MyComponent() {
+  const { locale } = useLocale();
+  return <div>{formatCurrency(1234.56, locale)}</div>;
+}
+```
+
+### Locale-aware functions
+
+The following formatting functions support locale customization:
+
+- `formatCurrency(value, locale)` — USDC amounts with locale-specific separators
+- `formatTonnes(value, locale)` — Tonnage with locale-specific thousand separators
+- `formatTonnesCompact(value, locale)` — Compact tonnage (e.g., "12.5K tCO2e")
+- `formatPricePerTonne(value, locale)` — Unit price per tonne
+- `formatDate(iso, locale)` — Human-readable date
+- `getMonthLabel(iso, locale)` — Month and year label
+- `getWeekLabel(iso, locale)` — Week label
+- `formatRelativeTime(value, now, locale)` — Relative time (falls back to formatted date after 7 days)
+
+### Testing
+
+Locale tests live in `src/test/locale.test.jsx` and `src/test/formatCurrency.test.js`.
+They verify:
+
+- Default locale is `en-US`
+- Locale persists to/from `localStorage`
+- `setLocale` updates the preference and re-renders components
+- Currency formatting adapts to selected locale (US, German, French, Spanish, Japanese)
+- Error handling when `localStorage` is unavailable
 
 ### LiveRegion component
 
