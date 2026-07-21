@@ -27,11 +27,12 @@ export function roundTo(value, decimals = 10) {
 /**
  * Format a number as USDC currency.
  * @param {number} value
+ * @param {string} [locale='en-US'] - BCP 47 language tag for number formatting
  * @returns {string}
  */
-export function formatCurrency(value) {
+export function formatCurrency(value, locale = 'en-US') {
   const n = Number(value) || 0;
-  return `${n.toLocaleString('en-US', {
+  return `${n.toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} USDC`;
@@ -40,11 +41,12 @@ export function formatCurrency(value) {
 /**
  * Format a tonnage value with the tCO2e unit.
  * @param {number} value
+ * @param {string} [locale='en-US'] - BCP 47 language tag for number formatting
  * @returns {string}
  */
-export function formatTonnes(value) {
+export function formatTonnes(value, locale = 'en-US') {
   const n = Number(value) || 0;
-  return `${n.toLocaleString('en-US')} tCO2e`;
+  return `${n.toLocaleString(locale)} tCO2e`;
 }
 
 /**
@@ -83,11 +85,12 @@ export function formatPercent(value) {
 /**
  * Format a large tonnage compactly, e.g. 12500 -> "12.5K tCO2e".
  * @param {number} value
+ * @param {string} [locale='en-US'] - BCP 47 language tag for number formatting
  * @returns {string}
  */
-export function formatTonnesCompact(value) {
+export function formatTonnesCompact(value, locale = 'en-US') {
   const n = Number(value) || 0;
-  const compact = n.toLocaleString('en-US', {
+  const compact = n.toLocaleString(locale, {
     notation: 'compact',
     maximumFractionDigits: 1,
   });
@@ -97,22 +100,24 @@ export function formatTonnesCompact(value) {
 /**
  * Format a unit price as a per-tonne currency string.
  * @param {number} value - price per tonne in USDC
+ * @param {string} [locale='en-US'] - BCP 47 language tag for number formatting
  * @returns {string}
  */
-export function formatPricePerTonne(value) {
-  return `${formatCurrency(value)} / tCO2e`;
+export function formatPricePerTonne(value, locale = 'en-US') {
+  return `${formatCurrency(value, locale)} / tCO2e`;
 }
 
 /**
  * Format an ISO date string as a human-readable date.
  * @param {string} iso
+ * @param {string} [locale='en-US'] - BCP 47 language tag for date formatting
  * @returns {string}
  */
-export function formatDate(iso) {
+export function formatDate(iso, locale = 'en-US') {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -136,13 +141,14 @@ export function getWeekStart(value) {
 /**
  * Return a human-readable month+year label for an ISO date, e.g. "July 2026".
  * @param {string} iso
+ * @param {string} [locale='en-US'] - BCP 47 language tag for date formatting
  * @returns {string}
  */
-export function getMonthLabel(iso) {
+export function getMonthLabel(iso, locale = 'en-US') {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  const parts = new Intl.DateTimeFormat('en-US', {
+  const parts = new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: 'long',
     timeZone: 'UTC',
@@ -155,12 +161,13 @@ export function getMonthLabel(iso) {
 /**
  * Return a week label for an ISO date, e.g. "Week of Jul 14".
  * @param {string} iso
+ * @param {string} [locale='en-US'] - BCP 47 language tag for date formatting
  * @returns {string}
  */
-export function getWeekLabel(iso) {
+export function getWeekLabel(iso, locale = 'en-US') {
   if (!iso) return '';
   const weekStart = getWeekStart(iso);
-  const parts = new Intl.DateTimeFormat('en-US', {
+  const parts = new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     timeZone: 'UTC',
@@ -176,9 +183,10 @@ export function getWeekLabel(iso) {
  * a full local date/time once it's more than a day old.
  * @param {string|number|Date} value - ISO string, epoch ms, or Date
  * @param {Date} [now] - reference time, defaults to the current time
+ * @param {string} [locale='en-US'] - BCP 47 language tag for date formatting in fallback
  * @returns {string}
  */
-export function formatRelativeTime(value, now = new Date()) {
+export function formatRelativeTime(value, now = new Date(), locale = 'en-US') {
   if (!value) return '';
   const then = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(then.getTime())) return '';
@@ -198,7 +206,7 @@ export function formatRelativeTime(value, now = new Date()) {
   const diffDay = Math.round(diffHour / 24);
   if (diffDay < 7) return `${diffDay} day${diffDay === 1 ? '' : 's'} ago`;
 
-  return then.toLocaleString('en-US', {
+  return then.toLocaleString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

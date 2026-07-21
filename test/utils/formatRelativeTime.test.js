@@ -52,3 +52,15 @@ test('formatRelativeTime returns empty string for missing or invalid input', () 
   assert.strictEqual(formatRelativeTime(null, BASE), '');
   assert.strictEqual(formatRelativeTime('not-a-date', BASE), '');
 });
+
+test('formatRelativeTime accepts optional locale parameter', () => {
+  const then = new Date(BASE.getTime() - 10 * 24 * 60 * 60 * 1000);
+  const resultEnUS = formatRelativeTime(then, BASE, 'en-US');
+  const resultDeDE = formatRelativeTime(then, BASE, 'de-DE');
+  
+  // Both should return formatted dates (not "ago"), but with different locales
+  assert.match(resultEnUS, /\d{4}/);
+  assert.match(resultDeDE, /\d{4}/);
+  assert.doesNotMatch(resultEnUS, /ago$/);
+  assert.doesNotMatch(resultDeDE, /ago$/);
+});
