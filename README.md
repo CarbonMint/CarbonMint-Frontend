@@ -110,6 +110,14 @@ The slippage fieldset follows the same patterns as the rest of the form:
 - Validation errors and the high-slippage warning use `role="alert"` /
   `aria-live="polite"` so screen readers announce them without interrupting.
 
+## Purchase form reset
+
+The buy form includes a **Reset form** action after the user changes a field or
+triggers validation. Resetting asks for confirmation before discarding the
+entered quantity, restoring the default 1 % slippage tolerance, and clearing
+validation messages. Declining the confirmation leaves every value unchanged.
+The reset action is disabled while a purchase is being processed.
+
 ## Precision guardrails
 
 JavaScript's IEEE-754 double-precision arithmetic introduces two classes of

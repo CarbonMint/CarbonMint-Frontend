@@ -55,6 +55,17 @@
   color: var(--color-muted);
 }
 
+.buy-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.buy-form-actions .btn:not(.btn-ghost) {
+  flex: 1;
+}
+
 .buy-form-soldout {
   margin: 0;
   color: var(--color-muted);

@@ -19,6 +19,8 @@ project follows semantic versioning.
 - `LocaleSelector` component for choosing currency format.
 - Comprehensive test coverage for locale functionality including currency
   formatting with multiple locales and localStorage persistence.
+- Purchase form reset action with confirmation before entered values and
+  validation state are cleared.
 - Keyboard-friendly buy and retire forms that submit when pressing Enter in a
   quantity or tonnes field.
 - Last-updated timestamp on the Marketplace page, shown as a relative time
