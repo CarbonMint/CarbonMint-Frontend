@@ -200,6 +200,12 @@ src/
 CarbonMint follows WCAG 2.1 SC 4.1.3 (Status Messages) to ensure screen readers
 receive timely announcements for every asynchronous UI update.
 
+### Icon-only buttons
+
+Every button that presents only a visual symbol or SVG (close, dismiss, scroll to
+top, copy, etc.) has an explicit `aria-label` so screen readers can identify its
+purpose. See `src/test/icon-buttons.test.jsx` for the full coverage.
+
 ## Locale preference
 
 Users can customize how currency and numbers are formatted throughout the

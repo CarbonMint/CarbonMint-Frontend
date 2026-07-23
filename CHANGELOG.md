@@ -21,6 +21,8 @@ project follows semantic versioning.
   formatting with multiple locales and localStorage persistence.
 - Keyboard-friendly buy and retire forms that submit when pressing Enter in a
   quantity or tonnes field.
+- Tests for all icon-only button `aria-label` attributes (close, dismiss,
+  navigate, connect/disconnect).
 - Last-updated timestamp on the Marketplace page, shown as a relative time
   (e.g. "Updated 2 minutes ago") that refreshes automatically and shows the
   full local date/time on hover.
