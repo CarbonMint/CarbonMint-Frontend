@@ -292,6 +292,7 @@ register it before any message is injected, preventing missed announcements.
 
 | Location | Event | Politeness |
 |---|---|---|
+| `RouteAnnouncer` | Route change ("Navigated to Marketplace") | polite |
 | `BuyForm` | Form submitting ("Processing your purchase…") | polite |
 | `BuyForm` | Validation error (empty / out-of-range quantity) | polite (`role=alert`) |
 | `RetireModal` | Form submitting ("Processing your retirement…") | polite |
