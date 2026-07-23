@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import Button from '../components/Button.jsx';
 import './NotFound.css';
 
 /**
@@ -11,8 +10,8 @@ export default function NotFound() {
       <h1>404</h1>
       <p>That page drifted off into the carbon sink.</p>
       <div className="not-found-action">
-        <Link to="/">
-          <Button>Back to Home</Button>
+        <Link to="/" className="btn btn-primary">
+          Back to Home
         </Link>
       </div>
     </div>

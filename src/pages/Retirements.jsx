@@ -72,8 +72,8 @@ export default function Retirements() {
           title="No retirements yet"
           message="Retire credits from My Credits to generate an offset certificate."
           action={
-            <Link to="/my-credits">
-              <Button>Go to My Credits</Button>
+            <Link to="/my-credits" className="btn btn-primary">
+              Go to My Credits
             </Link>
           }
         />

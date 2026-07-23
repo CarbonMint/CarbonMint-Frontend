@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Button from './Button.jsx';
 import LiveRegion from './LiveRegion.jsx';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { formatTonnes } from '../utils/format.js';
 import { validateRetireQuantity } from '../utils/validate.js';
 import './RetireModal.css';
@@ -20,6 +21,7 @@ export default function RetireModal({ holding, submitting, onConfirm, onClose })
   const [beneficiary, setBeneficiary] = useState('');
   const [touched, setTouched] = useState(false);
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
 
   const validation = useMemo(
     () => validateRetireQuantity(tonnes, holding.tonnes),
@@ -39,6 +41,9 @@ export default function RetireModal({ holding, submitting, onConfirm, onClose })
       document.body.style.overflow = previousOverflow;
     };
   }, [onClose]);
+
+  // Trap focus inside the dialog while it is open.
+  useFocusTrap(dialogRef, true);
 
   // Move focus into the dialog so keyboard users start inside it.
   useEffect(() => {
@@ -67,6 +72,7 @@ export default function RetireModal({ holding, submitting, onConfirm, onClose })
     <div className="modal-overlay" onClick={onClose}>
       <form
         className="modal"
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="retire-modal-title"

@@ -139,8 +139,8 @@ export default function MyCredits() {
           title="No credits yet"
           message="Buy verified carbon credits from the marketplace to get started."
           action={
-            <Link to="/marketplace">
-              <Button>Browse Marketplace</Button>
+            <Link to="/marketplace" className="btn btn-primary">
+              Browse Marketplace
             </Link>
           }
         />
@@ -164,7 +164,7 @@ export default function MyCredits() {
               <option value="vintage-asc">Vintage: Oldest first</option>
             </select>
           </div>
-          <div className="holdings-list">
+          <div className="holdings-list" role="grid" aria-label="Credit holdings">
             <div className="holdings-header" role="row">
               {HOLDING_COLUMNS.map((col) => {
                 const isAsc = sort === `${col.key}-asc`;
@@ -188,18 +188,20 @@ export default function MyCredits() {
               <span className="holdings-header-action">Action</span>
             </div>
             {sortedHoldings.map((holding) => (
-              <div className="holding-row" key={holding.batchId}>
-                <div className="holding-info">
+              <div className="holding-row" key={holding.batchId} role="row">
+                <div className="holding-info" role="gridcell">
                   <strong>{holding.projectName}</strong>
                   <span className="holding-sub">
                     Vintage {holding.vintage} · {formatCurrency(holding.pricePerTonne)}{' '}
                     / tonne
                   </span>
                 </div>
-                <div className="holding-amount">{formatTonnes(holding.tonnes)}</div>
-                <Button variant="danger" onClick={() => setActive(holding)}>
-                  Retire
-                </Button>
+                <div className="holding-amount" role="gridcell">{formatTonnes(holding.tonnes)}</div>
+                <div role="gridcell">
+                  <Button variant="danger" onClick={() => setActive(holding)}>
+                    Retire
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

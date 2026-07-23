@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import './Drawer.css';
 
 /**
@@ -11,6 +12,11 @@ import './Drawer.css';
  * @param {string} [props.title] - optional heading shown in the drawer header
  */
 export default function Drawer({ open, onClose, side = 'right', title, children }) {
+  const drawerRef = useRef(null);
+
+  // Trap focus inside the drawer while it is open.
+  useFocusTrap(drawerRef, open);
+
   useEffect(() => {
     if (!open) return undefined;
     function onKey(event) {
@@ -18,6 +24,13 @@ export default function Drawer({ open, onClose, side = 'right', title, children 
     }
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+
+    // Move focus into the drawer when it opens.
+    const firstFocusable = drawerRef.current?.querySelector(
+      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    firstFocusable?.focus();
+
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
@@ -29,6 +42,7 @@ export default function Drawer({ open, onClose, side = 'right', title, children 
   return (
     <div className="drawer-backdrop" onClick={onClose}>
       <aside
+        ref={drawerRef}
         className={`drawer drawer-${side}`}
         role="dialog"
         aria-modal="true"

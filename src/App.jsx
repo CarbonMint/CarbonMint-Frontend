@@ -21,9 +21,12 @@ export default function App() {
     <>
       <GlobalShortcuts />
       <ScrollToTop />
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <ScrollToTopButton />
       <Navbar />
-      <main className="app-main">
+      <main className="app-main" id="main-content" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/marketplace" element={<Marketplace />} />
