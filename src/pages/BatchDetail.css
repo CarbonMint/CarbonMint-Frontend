@@ -76,6 +76,13 @@
   word-break: break-all;
 }
 
+/* Tablet landscape: slightly narrower main column so the sidebar has room */
+@media (orientation: landscape) and (max-width: 1100px) {
+  .batch-detail-grid {
+    grid-template-columns: 1.3fr 1fr;
+  }
+}
+
 @media (max-width: 720px) {
   .batch-detail-grid {
     grid-template-columns: 1fr;

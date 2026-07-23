@@ -122,6 +122,21 @@
   color: var(--color-accent);
 }
 
+/* Tablet landscape: compact summary cards */
+@media (orientation: landscape) and (max-width: 1100px) {
+  .holdings-summary {
+    gap: 0.75rem;
+  }
+
+  .summary-card {
+    padding: 0.75rem;
+  }
+
+  .summary-card strong {
+    font-size: 1.2rem;
+  }
+}
+
 @media (max-width: 560px) {
   .holding-row {
     grid-template-columns: 1fr auto;

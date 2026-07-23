@@ -8,6 +8,15 @@ project follows semantic versioning.
 
 ### Added
 
+- **Landscape layout for tablets**: New CSS media queries optimise spacing,
+  typography, and grid proportions for tablet-sized screens in landscape
+  orientation (width ≤ 1100px in landscape). Covers App shell, Navbar, Home,
+  Marketplace, BatchDetail, MyCredits, and Settings pages.
+- `useOrientation` hook for detecting viewport orientation via
+  `window.matchMedia('(orientation: landscape)')`.
+- **Landscape layout styling**: Compact paddings, tighter gaps, optimised hero
+  section, adjusted grid ratios, smaller summary cards, and denser controls
+  when the device is in landscape orientation at tablet widths.
 - **Locale preference for currency formatting**: Users can now select their
   preferred number and currency formatting locale from the Settings page.
   Supported locales include en-US, en-GB, de-DE, fr-FR, es-ES, pt-BR, and ja-JP.
