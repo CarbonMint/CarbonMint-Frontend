@@ -200,6 +200,21 @@ src/
 CarbonMint follows WCAG 2.1 SC 4.1.3 (Status Messages) to ensure screen readers
 receive timely announcements for every asynchronous UI update.
 
+### Contrast preference
+
+The app respects the user's system-level contrast preference via the
+`prefers-contrast` media query:
+
+- **`prefers-contrast: more`** — increases colour contrast throughout the UI
+  (brighter text, more saturated accents, more visible borders) to aid users with
+  visual impairments.
+- **`prefers-contrast: less`** — softens contrast for users who experience visual
+  discomfort or glare from high-contrast displays.
+
+All colours are defined as CSS custom properties in `:root` (`src/index.css`),
+and the `@media (prefers-contrast: ...)` blocks override those variables so the
+entire application adjusts automatically.
+
 ## Locale preference
 
 Users can customize how currency and numbers are formatted throughout the
