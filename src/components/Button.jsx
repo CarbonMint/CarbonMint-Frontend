@@ -12,6 +12,7 @@ export default function Button({
   onClick,
   children,
   className = '',
+  tabIndex,
 }) {
   return (
     <button
@@ -19,6 +20,7 @@ export default function Button({
       disabled={disabled}
       onClick={onClick}
       className={`btn btn-${variant} ${className}`.trim()}
+      tabIndex={tabIndex}
     >
       {children}
     </button>

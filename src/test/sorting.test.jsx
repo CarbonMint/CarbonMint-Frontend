@@ -84,131 +84,55 @@ describe('Marketplace list view sorting', () => {
     );
   }
 
-  it('renders clickable column headers in list view', () => {
+  it('renders the sort dropdown in list view', () => {
     renderMarketplace();
-    // Switch to list view
     fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
-    expect(screen.getByRole('columnheader', { name: /Project/ })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Country/ })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Vintage/ })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Available/ })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: /Price/ })).toBeInTheDocument();
+    expect(screen.getByLabelText('Sort batches')).toBeInTheDocument();
   });
 
-  it('sets aria-sort=none on all headers when no sort is active', () => {
+  it('sorts by price ascending when dropdown is set to Price: Low to High', () => {
     renderMarketplace();
     fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
-    const headers = screen.getAllByRole('columnheader');
-    headers.forEach((h) => {
-      expect(h).toHaveAttribute('aria-sort', 'none');
-    });
-  });
+    fireEvent.change(screen.getByLabelText('Sort batches'), { target: { value: 'price-asc' } });
 
-  it('sets aria-sort=ascending after clicking a header once', () => {
-    renderMarketplace();
-    fireEvent.click(screen.getByRole('button', { name: 'List' }));
-
-    const priceHeader = screen.getByRole('columnheader', { name: /Price/ });
-    fireEvent.click(priceHeader);
-
-    expect(priceHeader).toHaveAttribute('aria-sort', 'ascending');
-  });
-
-  it('sets aria-sort=descending after clicking a header twice', () => {
-    renderMarketplace();
-    fireEvent.click(screen.getByRole('button', { name: 'List' }));
-
-    const priceHeader = screen.getByRole('columnheader', { name: /Price/ });
-    fireEvent.click(priceHeader);
-    fireEvent.click(priceHeader);
-
-    expect(priceHeader).toHaveAttribute('aria-sort', 'descending');
-  });
-
-  it('returns to aria-sort=none after clicking a header three times', () => {
-    renderMarketplace();
-    fireEvent.click(screen.getByRole('button', { name: 'List' }));
-
-    const priceHeader = screen.getByRole('columnheader', { name: /Price/ });
-    fireEvent.click(priceHeader);
-    fireEvent.click(priceHeader);
-    fireEvent.click(priceHeader);
-
-    expect(priceHeader).toHaveAttribute('aria-sort', 'none');
-  });
-
-  it('sorts by price ascending when header is clicked once', () => {
-    renderMarketplace();
-    fireEvent.click(screen.getByRole('button', { name: 'List' }));
-
-    fireEvent.click(screen.getByRole('columnheader', { name: /Price/ }));
-
-    // After price asc sort, first row should be the cheapest batch (India Solar)
     const rows = document.querySelectorAll('.listing-row');
     expect(rows[0]).toHaveTextContent('India Solar');
     expect(rows[3]).toHaveTextContent('Iceland DAC');
   });
 
-  it('sorts by price descending when header is clicked twice', () => {
+  it('sorts by price descending when dropdown is set to Price: High to Low', () => {
     renderMarketplace();
     fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
-    const priceHeader = screen.getByRole('columnheader', { name: /Price/ });
-    fireEvent.click(priceHeader);
-    fireEvent.click(priceHeader);
+    fireEvent.change(screen.getByLabelText('Sort batches'), { target: { value: 'price-desc' } });
 
     const rows = document.querySelectorAll('.listing-row');
     expect(rows[0]).toHaveTextContent('Iceland DAC');
     expect(rows[3]).toHaveTextContent('India Solar');
   });
 
-  it('dropdown selection updates aria-sort on the corresponding header', () => {
+  it('sorts by most available when dropdown is set to Most available', () => {
     renderMarketplace();
     fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
-    const dropdown = screen.getByLabelText('Sort batches');
-    fireEvent.change(dropdown, { target: { value: 'name-desc' } });
+    fireEvent.change(screen.getByLabelText('Sort batches'), { target: { value: 'available-desc' } });
 
-    const nameHeader = screen.getByRole('columnheader', { name: /Project/ });
-    expect(nameHeader).toHaveAttribute('aria-sort', 'descending');
+    const rows = document.querySelectorAll('.listing-row');
+    expect(rows[0]).toHaveTextContent('India Solar');
+    expect(rows[3]).toHaveTextContent('Iceland DAC');
   });
 
-  it('shows sort arrow indicator on the active header', () => {
+  it('resets to default sort order', () => {
     renderMarketplace();
     fireEvent.click(screen.getByRole('button', { name: 'List' }));
 
-    const vintageHeader = screen.getByRole('columnheader', { name: /Vintage/ });
-    fireEvent.click(vintageHeader);
+    fireEvent.change(screen.getByLabelText('Sort batches'), { target: { value: 'price-asc' } });
+    fireEvent.change(screen.getByLabelText('Sort batches'), { target: { value: 'default' } });
 
-    // Arrow is aria-hidden
-    const arrow = vintageHeader.querySelector('.sort-arrow');
-    expect(arrow).toBeInTheDocument();
-    expect(arrow).toHaveAttribute('aria-hidden', 'true');
-  });
-
-  it('toggling sort on one column clears sort on another', () => {
-    renderMarketplace();
-    fireEvent.click(screen.getByRole('button', { name: 'List' }));
-
-    // Click Price header
-    fireEvent.click(screen.getByRole('columnheader', { name: /Price/ }));
-    expect(screen.getByRole('columnheader', { name: /Price/ })).toHaveAttribute(
-      'aria-sort',
-      'ascending'
-    );
-
-    // Click Project header — Price should reset
-    fireEvent.click(screen.getByRole('columnheader', { name: /Project/ }));
-    expect(screen.getByRole('columnheader', { name: /Price/ })).toHaveAttribute(
-      'aria-sort',
-      'none'
-    );
-    expect(screen.getByRole('columnheader', { name: /Project/ })).toHaveAttribute(
-      'aria-sort',
-      'ascending'
-    );
+    const rows = document.querySelectorAll('.listing-row');
+    expect(rows[0]).toHaveTextContent('Amazon REDD+');
   });
 });
 

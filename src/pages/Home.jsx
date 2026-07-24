@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import Button from '../components/Button.jsx';
 import { BATCHES } from '../services/market.js';
 import { PROJECTS } from '../constants/projects.js';
 import { formatTonnes } from '../utils/format.js';
@@ -44,11 +43,11 @@ export default function Home() {
           them to claim a permanent, auditable offset certificate.
         </p>
         <div className="hero-actions">
-          <Link to="/marketplace">
-            <Button>Explore Marketplace</Button>
+          <Link to="/marketplace" className="btn btn-primary">
+            Explore Marketplace
           </Link>
-          <Link to="/my-credits">
-            <Button variant="secondary">View My Credits</Button>
+          <Link to="/my-credits" className="btn btn-secondary">
+            View My Credits
           </Link>
         </div>
       </section>
