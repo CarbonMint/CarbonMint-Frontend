@@ -222,6 +222,11 @@ The app respects the user's system-level contrast preference via the
 All colours are defined as CSS custom properties in `:root` (`src/index.css`),
 and the `@media (prefers-contrast: ...)` blocks override those variables so the
 entire application adjusts automatically.
+### Icon-only buttons
+
+Every button that presents only a visual symbol or SVG (close, dismiss, scroll to
+top, copy, etc.) has an explicit `aria-label` so screen readers can identify its
+purpose. See `src/test/icon-buttons.test.jsx` for the full coverage.
 
 ## Locale preference
 
