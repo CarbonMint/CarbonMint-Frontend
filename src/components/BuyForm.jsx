@@ -60,6 +60,11 @@ export default function BuyForm({ batch, onBuy, submitting }) {
 
   /** True when slippage > 5 % — show a gentle warning. */
   const highSlippage = Number(slippage) > 5;
+  const hasChanges =
+    quantity !== '' ||
+    slippage !== String(DEFAULT_SLIPPAGE) ||
+    (touched && !validation.valid) ||
+    (slippageTouched && !slippageValidation.valid);
 
   function handleSlippagePreset(preset) {
     setSlippage(String(preset));
@@ -72,6 +77,21 @@ export default function BuyForm({ batch, onBuy, submitting }) {
     setSlippageTouched(true);
     if (!validation.valid || !slippageValidation.valid) return;
     onBuy(Number(quantity), Number(slippage));
+  }
+
+  function handleReset(event) {
+    event.preventDefault();
+    if (submitting || !hasChanges) return;
+
+    const confirmed = window.confirm(
+      'Reset this form? Your entered values will be cleared.'
+    );
+    if (!confirmed) return;
+
+    setQuantity('');
+    setTouched(false);
+    setSlippage(String(DEFAULT_SLIPPAGE));
+    setSlippageTouched(false);
   }
 
   if (soldOut) {
@@ -87,7 +107,7 @@ export default function BuyForm({ batch, onBuy, submitting }) {
   }
 
   return (
-    <form className="buy-form" onSubmit={handleSubmit}>
+    <form className="buy-form" onSubmit={handleSubmit} onReset={handleReset}>
       <h2 className="buy-form-title">Buy credits</h2>
 
       {/* ── Quantity ── */}
@@ -189,22 +209,32 @@ export default function BuyForm({ batch, onBuy, submitting }) {
         {formatCurrency(batch.pricePerTonne)} / tonne
       </p>
 
-      {isConnected ? (
+      <div className="buy-form-actions">
         <Button
-          type="submit"
-          disabled={
-            submitting ||
-            (touched && !validation.valid) ||
-            (slippageTouched && !slippageValidation.valid)
-          }
+          type="reset"
+          variant="ghost"
+          disabled={submitting || !hasChanges}
         >
-          {submitting ? 'Processing...' : 'Buy now'}
+          Reset form
         </Button>
-      ) : (
-        <Button type="button" variant="secondary" onClick={connect}>
-          Connect wallet to buy
-        </Button>
-      )}
+
+        {isConnected ? (
+          <Button
+            type="submit"
+            disabled={
+              submitting ||
+              (touched && !validation.valid) ||
+              (slippageTouched && !slippageValidation.valid)
+            }
+          >
+            {submitting ? 'Processing...' : 'Buy now'}
+          </Button>
+        ) : (
+          <Button type="button" variant="secondary" onClick={connect}>
+            Connect wallet to buy
+          </Button>
+        )}
+      </div>
     </form>
   );
 }
