@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import GlobalShortcuts from './components/GlobalShortcuts.jsx';
+import RouteAnnouncer from './components/RouteAnnouncer.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import ScrollToTopButton from './components/ScrollToTopButton.jsx';
 import Home from './pages/Home.jsx';
@@ -19,6 +20,7 @@ import './App.css';
 export default function App() {
   return (
     <>
+      <RouteAnnouncer />
       <GlobalShortcuts />
       <ScrollToTop />
       <ScrollToTopButton />
