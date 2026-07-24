@@ -8,6 +8,13 @@ project follows semantic versioning.
 
 ### Added
 
+- **`prefers-contrast` CSS media query support**: The app now respects
+  `prefers-contrast: more` (higher contrast colours for accessibility) and
+  `prefers-contrast: less` (reduced contrast). All colour values are driven by
+  CSS custom properties, so contrast overrides apply globally.
+- Settings page and LocaleSelector now use the project's standard CSS custom
+  properties instead of separate variables, making them consistent with the
+  rest of the app and responsive to contrast preferences.
 - **Locale preference for currency formatting**: Users can now select their
   preferred number and currency formatting locale from the Settings page.
   Supported locales include en-US, en-GB, de-DE, fr-FR, es-ES, pt-BR, and ja-JP.

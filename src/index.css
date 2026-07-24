@@ -87,3 +87,39 @@ h3 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Respect users who prefer higher contrast. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-bg: #080c0a;
+    --color-surface: #0c1410;
+    --color-surface-2: #111c16;
+    --color-primary: #0d7a45;
+    --color-primary-light: #22c67a;
+    --color-accent: #8fffc0;
+    --color-text: #ffffff;
+    --color-muted: #c5d9d1;
+    --color-border: #4a5e56;
+    --color-danger: #ff4040;
+    --color-warning: #ffa500;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Respect users who prefer lower contrast. */
+@media (prefers-contrast: less) {
+  :root {
+    --color-bg: #1a2622;
+    --color-surface: #222f2a;
+    --color-surface-2: #2a3a33;
+    --color-primary: #1b8f5a;
+    --color-primary-light: #2fb978;
+    --color-accent: #bff5d6;
+    --color-text: #c5d5cd;
+    --color-muted: #7a8f86;
+    --color-border: #1c2823;
+    --color-danger: #c05050;
+    --color-warning: #c09040;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+}
