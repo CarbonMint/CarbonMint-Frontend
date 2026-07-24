@@ -122,6 +122,22 @@
   margin-bottom: 0;
 }
 
+/* Tablet landscape: compact settings */
+@media (orientation: landscape) and (max-width: 1100px) {
+  .settings-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .settings-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .settings-section {
+    padding: 1.25rem;
+  }
+}
+
 @media (max-width: 640px) {
   .settings-page {
     padding: 1rem 0.75rem;
