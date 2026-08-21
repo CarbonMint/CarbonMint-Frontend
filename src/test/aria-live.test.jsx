@@ -239,7 +239,7 @@ describe('BuyForm', () => {
     await user.type(input, '3');
     await user.keyboard('{Enter}');
 
-    expect(onBuy).toHaveBeenCalledWith(3);
+    expect(onBuy).toHaveBeenCalledWith(3, 1);
   });
 
   it('renders a "Sold out" message and no form when availableTonnes is 0', () => {

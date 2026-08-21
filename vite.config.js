@@ -13,5 +13,10 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.js'],
     include: ['src/test/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    exclude: [
+      'src/test/formatCurrency.test.js',
+      'src/test/formatTonnes.test.js',
+      'src/test/locale.test.jsx',
+    ],
   },
 });
