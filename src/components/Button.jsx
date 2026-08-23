@@ -13,6 +13,7 @@ export default function Button({
   children,
   className = '',
   tabIndex,
+  ...rest
 }) {
   return (
     <button
@@ -21,6 +22,7 @@ export default function Button({
       onClick={onClick}
       className={`btn btn-${variant} ${className}`.trim()}
       tabIndex={tabIndex}
+      {...rest}
     >
       {children}
     </button>

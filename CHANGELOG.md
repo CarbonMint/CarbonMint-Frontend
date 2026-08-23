@@ -6,6 +6,16 @@ project follows semantic versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Purchase and retirement dialogs are keyboard- and screen-reader complete**:
+  quantity / tonnes / slippage / beneficiary fields now have explicit labels;
+  validation errors are announced (`role="alert"`) and associated with their
+  controls via `aria-invalid` + `aria-describedby`; the retirement dialog
+  traps Tab focus, recaptures focus that would escape, and returns focus to
+  the trigger on close. Submit progress is announced through existing live
+  regions. Regression tests cover the original failure mode.
+
 ### Added
 
 - **`prefers-contrast` CSS media query support**: The app now respects
