@@ -23,13 +23,80 @@ function withProject(batch) {
 }
 
 /**
- * Fetch all marketplace batches with their project metadata.
- * @returns {Promise<Array>}
+ * Fetch marketplace batches with optional search, filtering, sorting, pagination, and request cancellation.
+ * @param {{
+ *   query?: string,
+ *   type?: string,
+ *   country?: string,
+ *   sort?: string,
+ *   page?: number,
+ *   pageSize?: number
+ * }} [params]
+ * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<Array & { totalCount?: number, page?: number, pageCount?: number, batches?: Array }>}
  */
-export async function fetchBatches() {
-  await delay(LATENCY_MS);
-  return clone(BATCHES).map(withProject);
+export async function fetchBatches(params = {}, options = {}) {
+  const { signal } = options;
+  await delay(LATENCY_MS, signal);
+
+  let results = clone(BATCHES).map(withProject);
+
+  const { query, type, country, sort, page, pageSize } = params || {};
+
+  if (query) {
+    const q = query.trim().toLowerCase();
+    results = results.filter((batch) => {
+      const p = batch.project || {};
+      return (
+        p.name?.toLowerCase().includes(q) ||
+        p.country?.toLowerCase().includes(q) ||
+        p.type?.toLowerCase().includes(q)
+      );
+    });
+  }
+
+  if (type && type !== 'all') {
+    results = results.filter(
+      (b) => b.project?.type?.toLowerCase() === type.toLowerCase()
+    );
+  }
+
+  if (country && country !== 'all') {
+    results = results.filter(
+      (b) => b.project?.country?.toLowerCase() === country.toLowerCase()
+    );
+  }
+
+  // Stable sorting with tie-breaker
+  results.sort((a, b) => {
+    let diff = 0;
+    if (sort === 'price-asc') diff = a.pricePerTonne - b.pricePerTonne;
+    else if (sort === 'price-desc') diff = b.pricePerTonne - a.pricePerTonne;
+    else if (sort === 'available-desc') diff = b.availableTonnes - a.availableTonnes;
+
+    if (diff !== 0) return diff;
+    return (a.id || '').localeCompare(b.id || '');
+  });
+
+  const totalCount = results.length;
+  const computedPageSize = pageSize || (totalCount > 0 ? totalCount : 1);
+  const computedPageCount = Math.max(1, Math.ceil(totalCount / computedPageSize));
+  const currentPage = Math.max(1, Math.min(page || 1, computedPageCount));
+
+  let pagedResults = results;
+  if (page && pageSize) {
+    const start = (currentPage - 1) * pageSize;
+    pagedResults = results.slice(start, start + pageSize);
+  }
+
+  Object.defineProperty(pagedResults, 'totalCount', { value: totalCount, writable: true, enumerable: false });
+  Object.defineProperty(pagedResults, 'page', { value: currentPage, writable: true, enumerable: false });
+  Object.defineProperty(pagedResults, 'pageCount', { value: computedPageCount, writable: true, enumerable: false });
+  Object.defineProperty(pagedResults, 'batches', { value: pagedResults, writable: true, enumerable: false });
+
+  return pagedResults;
 }
+
 
 /**
  * Fetch a single batch by id.

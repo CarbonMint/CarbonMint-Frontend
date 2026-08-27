@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMarket } from "../hooks/useMarket.js";
 import { useDocumentTitle } from "../hooks/useDocumentTitle.js";
 import { useDebounce } from "../hooks/useDebounce.js";
@@ -11,30 +11,69 @@ import SkeletonGrid from "../components/SkeletonGrid.jsx";
 import ErrorMessage from "../components/ErrorMessage.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import RecentSearches from "../components/RecentSearches.jsx";
+import Pagination from "../components/Pagination.jsx";
 import "./Marketplace.css";
 
+const DEFAULT_PAGE_SIZE = 6;
+
 /**
- * Marketplace page listing all available carbon-credit batches. Supports a
- * grid and list view toggle, plus a recent-searches dropdown.
+ * Marketplace page listing available carbon-credit batches with bounded search,
+ * debounced input, pagination, request cancellation, and stable filtering/sorting.
  */
 export default function Marketplace() {
   useDocumentTitle("Marketplace");
-  const { batches, loading, error, lastUpdated, reload } = useMarket();
   const [view, setView] = useState("grid");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("default");
+  const [page, setPage] = useState(1);
   const [showRecent, setShowRecent] = useState(false);
-  const debouncedQuery = useDebounce(query);
+
+  const debouncedQuery = useDebounce(query, 250);
   const { searches, push, remove, clear } = useRecentSearches();
   const searchRef = useRef(null);
 
+  // Reset pagination to page 1 whenever query or sort changes
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, sort]);
+
+  const {
+    batches,
+    totalCount: serverTotal,
+    pageCount: serverPageCount,
+    loading,
+    error,
+    lastUpdated,
+    reload,
+  } = useMarket({
+    query: debouncedQuery,
+    sort,
+    page,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
+
   // Re-render every 30s so the relative "updated Xs ago" label stays fresh
-  // without needing to refetch the data itself.
   const [, forceTick] = useState(0);
   useInterval(() => forceTick((n) => n + 1), lastUpdated ? 30000 : null);
 
-  const filtered = useMemo(() => {
+  const { displayBatches, effectivePageCount } = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase();
+
+    // Check if batches provided by useMarket is already filtered and paginated
+    const isServerPaginated =
+      serverPageCount !== undefined &&
+      serverTotal !== undefined &&
+      batches.length <= DEFAULT_PAGE_SIZE &&
+      !q;
+
+    if (isServerPaginated) {
+      return {
+        displayBatches: batches,
+        effectivePageCount: serverPageCount,
+      };
+    }
+
+    // Client-side fallback (handles mocks and un-paginated data safely)
     const matched = !q
       ? batches
       : batches.filter((batch) => {
@@ -47,15 +86,29 @@ export default function Marketplace() {
         });
 
     const sorted = [...matched];
-    if (sort === "price-asc") {
-      sorted.sort((a, b) => a.pricePerTonne - b.pricePerTonne);
-    } else if (sort === "price-desc") {
-      sorted.sort((a, b) => b.pricePerTonne - a.pricePerTonne);
-    } else if (sort === "available-desc") {
-      sorted.sort((a, b) => b.availableTonnes - a.availableTonnes);
-    }
-    return sorted;
-  }, [batches, debouncedQuery, sort]);
+    sorted.sort((a, b) => {
+      let diff = 0;
+      if (sort === "price-asc") diff = a.pricePerTonne - b.pricePerTonne;
+      else if (sort === "price-desc") diff = b.pricePerTonne - a.pricePerTonne;
+      else if (sort === "available-desc") diff = b.availableTonnes - a.availableTonnes;
+
+      if (diff !== 0) return diff;
+      return (a.id || "").localeCompare(b.id || "");
+    });
+
+    const calculatedPageCount = Math.max(1, Math.ceil(sorted.length / DEFAULT_PAGE_SIZE));
+    const currentPage = Math.max(1, Math.min(page, calculatedPageCount));
+
+    const paged =
+      sorted.length > DEFAULT_PAGE_SIZE
+        ? sorted.slice((currentPage - 1) * DEFAULT_PAGE_SIZE, currentPage * DEFAULT_PAGE_SIZE)
+        : sorted;
+
+    return {
+      displayBatches: paged,
+      effectivePageCount: serverPageCount ?? calculatedPageCount,
+    };
+  }, [batches, debouncedQuery, sort, page, serverPageCount, serverTotal]);
 
   return (
     <div className="marketplace">
@@ -148,22 +201,22 @@ export default function Marketplace() {
           message="Check back soon as new verified projects mint their credits."
         />
       )}
-      {!loading && !error && batches.length > 0 && filtered.length === 0 && (
+      {!loading && !error && batches.length > 0 && displayBatches.length === 0 && (
         <EmptyState
           title="No matches"
           message="No batches match your search. Try a different term."
         />
       )}
 
-      {!loading && !error && filtered.length > 0 && view === "grid" && (
+      {!loading && !error && displayBatches.length > 0 && view === "grid" && (
         <div className="marketplace-grid">
-          {filtered.map((batch) => (
+          {displayBatches.map((batch) => (
             <BatchCard key={batch.id} batch={batch} />
           ))}
         </div>
       )}
 
-      {!loading && !error && filtered.length > 0 && view === "list" && (
+      {!loading && !error && displayBatches.length > 0 && view === "list" && (
         <div className="marketplace-list">
           <div className="listing-header">
             <span>Project</span>
@@ -172,11 +225,20 @@ export default function Marketplace() {
             <span>Available</span>
             <span className="listing-header-price">Price</span>
           </div>
-          {filtered.map((batch) => (
+          {displayBatches.map((batch) => (
             <ListingRow key={batch.id} batch={batch} />
           ))}
         </div>
       )}
+
+      {!loading && !error && effectivePageCount > 1 && (
+        <Pagination
+          page={page}
+          pageCount={effectivePageCount}
+          onChange={(nextPage) => setPage(nextPage)}
+        />
+      )}
     </div>
   );
 }
+
