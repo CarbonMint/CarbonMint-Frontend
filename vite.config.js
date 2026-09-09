@@ -19,4 +19,20 @@ export default defineConfig({
       'src/test/locale.test.jsx',
     ],
   },
+  build:{
+    // Here I am lowering the warning limit per fragment to 400KB to alert about heavy bundles
+    chunkSizeWarningLimit:400,
+    rollupOptions:{
+      output:{
+        //in this code what I do is divide the code to separate the heavy libraries of node_modules
+        manualChunks(id){
+          if(id.includes('node_modules')){
+            // I separate react and core libraries into their own small files
+            if(id.includes('react')) return 'vendor-react';
+            return 'vendor-libs';
+          }
+        }
+      }
+    }
+  }
 });
